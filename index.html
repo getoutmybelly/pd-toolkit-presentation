@@ -3,1191 +3,1209 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Toolkit Design as a Social Work Intervention: Parkinson's Disease Resource Toolkit</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Parkinson's Disease Resource Toolkit · SIUC</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --surface2: #1a2235;
-    --accent: #6ee7b7;
-    --accent2: #38bdf8;
-    --accent3: #f59e0b;
-    --text: #e2e8f0;
-    --text-muted: #94a3b8;
-    --border: rgba(110,231,183,0.15);
-    --glow: rgba(110,231,183,0.08);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    overflow: hidden;
-    height: 100vh;
-    width: 100vw;
-  }
-
-  /* ── SHELL ── */
-  #shell {
-    display: grid;
-    grid-template-rows: 56px 1fr 48px;
-    height: 100vh;
-  }
-
-  /* ── TOPBAR ── */
-  #topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 28px;
-    gap: 20px;
-    position: relative;
-    z-index: 10;
-  }
-
-  #topbar .logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-  }
-
-  #topbar .divider { width: 1px; height: 24px; background: var(--border); }
-
-  #slide-title {
-    font-size: 13px;
-    color: var(--text-muted);
-    flex: 1;
-    font-weight: 300;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  #progress-bar {
-    position: absolute;
-    bottom: 0; left: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    transition: width 0.5s ease;
-    box-shadow: 0 0 12px var(--accent);
-  }
-
-  /* ── MAIN AREA ── */
-  #main {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    overflow: hidden;
-  }
-
-  /* ── SIDEBAR ── */
-  #sidebar {
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 16px 0;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-
-  .nav-section {
-    padding: 6px 16px 4px;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-muted);
-    margin-top: 8px;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-left: 2px solid transparent;
-    font-size: 12.5px;
-    font-weight: 400;
-    color: var(--text-muted);
-    user-select: none;
-  }
-
-  .nav-item:hover { background: var(--glow); color: var(--text); }
-  .nav-item.active {
-    border-left-color: var(--accent);
-    background: var(--glow);
-    color: var(--accent);
-    font-weight: 500;
-  }
-
-  .nav-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    flex-shrink: 0;
-    background: var(--surface2);
-  }
-
-  /* ── SLIDE AREA ── */
-  #stage {
-    overflow: hidden;
-    position: relative;
-    background: var(--bg);
-  }
-
-  .slide {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(40px);
-    transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-    padding: 48px 60px;
-  }
-
-  .slide.active {
-    opacity: 1;
-    pointer-events: all;
-    transform: translateX(0);
-  }
-
-  .slide.exit {
-    opacity: 0;
-    transform: translateX(-40px);
-  }
-
-  /* ── SLIDE CONTENT PRIMITIVES ── */
-  .slide-tag {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .slide-tag::before {
-    content: '';
-    display: block;
-    width: 24px;
-    height: 1px;
-    background: var(--accent);
-  }
-
-  h1.slide-h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(36px, 5vw, 58px);
-    font-weight: 300;
-    line-height: 1.1;
-    color: var(--text);
-    margin-bottom: 20px;
-  }
-
-  h1.slide-h1 em {
-    font-style: italic;
-    color: var(--accent);
-  }
-
-  h2.slide-h2 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(26px, 3.5vw, 38px);
-    font-weight: 300;
-    color: var(--text);
-    margin-bottom: 24px;
-    line-height: 1.2;
-  }
-
-  .lead {
-    font-size: 15px;
-    line-height: 1.7;
-    color: var(--text-muted);
-    max-width: 640px;
-    font-weight: 300;
-  }
-
-  /* ── GRID CARDS ── */
-  .card-grid {
-    display: grid;
-    gap: 16px;
-    margin-top: 28px;
-  }
-
-  .card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--glow);
-    opacity: 0;
-    transition: opacity 0.25s;
-  }
-
-  .card:hover::before { opacity: 1; }
-  .card:hover { border-color: rgba(110,231,183,0.3); transform: translateY(-2px); }
-
-  .card-icon { font-size: 26px; margin-bottom: 12px; }
-
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 6px;
-    letter-spacing: 0.02em;
-  }
-
-  .card-body {
-    font-size: 12px;
-    line-height: 1.6;
-    color: var(--text-muted);
-    font-weight: 300;
-  }
-
-  .card.accent-border { border-left: 3px solid var(--accent); }
-  .card.accent2-border { border-left: 3px solid var(--accent2); }
-  .card.accent3-border { border-left: 3px solid var(--accent3); }
-
-  /* ── STAT STRIP ── */
-  .stat-strip {
-    display: flex;
-    gap: 24px;
-    margin: 28px 0;
-    flex-wrap: wrap;
-  }
-
-  .stat-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 24px;
-    text-align: center;
-    flex: 1;
-    min-width: 120px;
-  }
-
-  .stat-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 38px;
-    font-weight: 300;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 4px;
-  }
-
-  /* ── TIMELINE ── */
-  .timeline {
-    position: relative;
-    margin-top: 28px;
-    padding-left: 28px;
-  }
-
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 8px; top: 0; bottom: 0;
-    width: 1px;
-    background: linear-gradient(to bottom, var(--accent), transparent);
-  }
-
-  .tl-item {
-    position: relative;
-    margin-bottom: 24px;
-    opacity: 0;
-    transform: translateX(-16px);
-    animation: fadeIn 0.5s ease forwards;
-  }
-
-  .tl-item:nth-child(1) { animation-delay: 0.1s; }
-  .tl-item:nth-child(2) { animation-delay: 0.2s; }
-  .tl-item:nth-child(3) { animation-delay: 0.3s; }
-  .tl-item:nth-child(4) { animation-delay: 0.4s; }
-  .tl-item:nth-child(5) { animation-delay: 0.5s; }
-
-  .tl-dot {
-    position: absolute;
-    left: -24px;
-    top: 6px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
-  }
-
-  .tl-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
-
-  .tl-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .tl-body {
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.6;
-  }
-
-  /* ── BADGE / PILL ── */
-  .pill {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    margin: 3px;
-  }
-
-  .pill-green { background: rgba(110,231,183,0.12); color: var(--accent); border: 1px solid rgba(110,231,183,0.25); }
-  .pill-blue  { background: rgba(56,189,248,0.12);  color: var(--accent2); border: 1px solid rgba(56,189,248,0.25); }
-  .pill-amber { background: rgba(245,158,11,0.12);  color: var(--accent3); border: 1px solid rgba(245,158,11,0.25); }
-
-  /* ── QUOTE BLOCK ── */
-  .quote-block {
-    border-left: 3px solid var(--accent);
-    padding: 16px 24px;
-    background: var(--surface);
-    border-radius: 0 10px 10px 0;
-    margin: 20px 0;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 18px;
-    font-style: italic;
-    color: var(--text);
-    line-height: 1.5;
-  }
-
-  /* ── MIND MAP ── */
-  #mindmap-svg {
-    width: 100%;
-    max-height: 420px;
-    margin-top: 16px;
-  }
-
-  /* ── COMPETENCY TABLE ── */
-  .comp-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-size: 13px;
-  }
-
-  .comp-table th {
-    background: var(--surface2);
-    color: var(--accent);
-    padding: 10px 16px;
-    text-align: left;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 500;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .comp-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    color: var(--text-muted);
-    vertical-align: top;
-    line-height: 1.5;
-  }
-
-  .comp-table tr:hover td { background: var(--glow); color: var(--text); }
-
-  .comp-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  /* ── COVER SLIDE SPECIAL ── */
-  #slide-cover {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background: radial-gradient(ellipse at 30% 50%, rgba(110,231,183,0.06) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(56,189,248,0.05) 0%, transparent 50%);
-  }
-
-  .cover-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 36px;
-    padding-top: 36px;
-    border-top: 1px solid var(--border);
-  }
-
-  .cover-meta-row {
-    display: flex;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .cover-meta-row strong { color: var(--text); font-weight: 500; }
-
-  /* ── FLOWCHART ── */
-  .flow-row {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-top: 24px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .flow-node {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 12.5px;
-    text-align: center;
-    flex: 1;
-    min-width: 120px;
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .flow-node.highlight {
-    border-color: var(--accent);
-    background: rgba(110,231,183,0.07);
-    color: var(--accent);
-  }
-
-  .flow-arrow {
-    color: var(--text-muted);
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  /* ── REFLECTION ── */
-  .reflection-card {
-    background: linear-gradient(135deg, var(--surface), var(--surface2));
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    margin-top: 20px;
-  }
-
-  /* ── BOTTOM BAR ── */
-  #bottombar {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
-  .nav-btns { display: flex; gap: 8px; }
-
-  .nav-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 6px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s;
-    user-select: none;
-  }
-
-  .nav-btn:hover { background: var(--glow); border-color: var(--accent); color: var(--accent); }
-  .nav-btn:disabled { opacity: 0.3; cursor: default; }
-
-  #slide-counter { font-size: 12px; }
-
-  /* ── ANIMATIONS ── */
-  @keyframes fadeIn {
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  .stagger > * {
-    opacity: 0;
-    transform: translateY(16px);
-    animation: fadeIn 0.5s ease forwards;
-  }
-
-  .stagger > *:nth-child(1) { animation-delay: 0.05s; }
-  .stagger > *:nth-child(2) { animation-delay: 0.12s; }
-  .stagger > *:nth-child(3) { animation-delay: 0.19s; }
-  .stagger > *:nth-child(4) { animation-delay: 0.26s; }
-  .stagger > *:nth-child(5) { animation-delay: 0.33s; }
-  .stagger > *:nth-child(6) { animation-delay: 0.40s; }
-  .stagger > *:nth-child(7) { animation-delay: 0.47s; }
-  .stagger > *:nth-child(8) { animation-delay: 0.54s; }
-
-  .highlight-text { color: var(--accent); font-weight: 500; }
-
-  /* ── SECTION HEADER BANDS ── */
-  .section-band {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .section-band-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 32px;
-    color: var(--accent);
-    font-weight: 300;
-    line-height: 1;
-    min-width: 40px;
-  }
-
-  .section-band-text { font-size: 13px; color: var(--text-muted); }
-  .section-band-text strong { color: var(--text); display: block; font-size: 15px; }
-
-  /* scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --cream: #faf8f4;
+  --warm-white: #f5f2eb;
+  --dark: #1a1a18;
+  --dark2: #2d2d2a;
+  --sage: #5a7a5c;
+  --sage-light: #8aab8c;
+  --sage-pale: #e8f0e8;
+  --teal: #2e7d8a;
+  --teal-light: #4a9aaa;
+  --amber: #c4853a;
+  --amber-pale: #fdf3e7;
+  --text: #2d2d2a;
+  --text-muted: #6b6b65;
+  --border: rgba(90,122,92,0.15);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--cream);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(250,248,244,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: var(--dark);
+  letter-spacing: 0.01em;
+}
+
+.nav-brand span { color: var(--sage); }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+  font-weight: 400;
+}
+
+.nav-links a:hover { color: var(--sage); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 100px 80px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba(90,122,92,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 10% 80%, rgba(46,125,138,0.06) 0%, transparent 45%);
+}
+
+.hero-eyebrow {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--sage);
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--sage);
+}
+
+h1.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--dark);
+  margin-bottom: 28px;
+  max-width: 720px;
+}
+
+h1.hero-title em {
+  font-style: italic;
+  color: var(--sage);
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: var(--text-muted);
+  max-width: 560px;
+  line-height: 1.75;
+  margin-bottom: 48px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  max-width: 680px;
+}
+
+.hero-meta-item { }
+
+.hero-meta-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.hero-meta-value {
+  font-size: 14px;
+  color: var(--dark);
+  font-weight: 400;
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 36px;
+  left: 80px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.scroll-line {
+  width: 40px;
+  height: 1px;
+  background: var(--text-muted);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { transform: scaleX(1); opacity: 1; }
+  50% { transform: scaleX(0.5); opacity: 0.4; }
+}
+
+/* ── SECTIONS COMMON ── */
+section {
+  padding: 100px 80px;
+}
+
+.section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--sage);
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: var(--sage);
+}
+
+h2.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--dark);
+  margin-bottom: 24px;
+  max-width: 600px;
+}
+
+h2.section-title em { font-style: italic; color: var(--sage); }
+
+.section-lead {
+  font-size: 16px;
+  color: var(--text-muted);
+  max-width: 560px;
+  line-height: 1.8;
+  margin-bottom: 60px;
+}
+
+/* ── ABOUT / PROBLEM ── */
+#about {
+  background: var(--dark);
+  color: var(--cream);
+  position: relative;
+  overflow: hidden;
+}
+
+#about::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(90,122,92,0.12) 0%, transparent 70%);
+}
+
+#about .section-label { color: var(--sage-light); }
+#about .section-label::before { background: var(--sage-light); }
+#about h2.section-title { color: var(--cream); max-width: 100%; }
+#about h2.section-title em { color: var(--sage-light); }
+#about .section-lead { color: rgba(250,248,244,0.65); max-width: 100%; }
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.about-text { }
+
+.pull-quote {
+  border-left: 2px solid var(--sage-light);
+  padding: 20px 28px;
+  margin: 32px 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-style: italic;
+  color: var(--cream);
+  line-height: 1.55;
+  background: rgba(255,255,255,0.03);
+  border-radius: 0 8px 8px 0;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 44px;
+  font-weight: 400;
+  color: var(--sage-light);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: rgba(250,248,244,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 400;
+}
+
+.stat-desc {
+  font-size: 13px;
+  color: rgba(250,248,244,0.6);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ── TOOLKIT SECTIONS ── */
+#toolkit { background: var(--warm-white); }
+
+.toolkit-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 72px;
+  align-items: end;
+}
+
+.section-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-tab {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.section-tab:hover, .section-tab.active {
+  background: white;
+  border-color: var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.section-tab.active .tab-num { color: var(--sage); }
+
+.tab-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--text-muted);
+  min-width: 28px;
+  transition: color 0.2s;
+}
+
+.tab-info {}
+
+.tab-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.tab-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.section-content { position: relative; }
+
+.content-panel {
+  display: none;
+  animation: fadeUp 0.35s ease;
+}
+
+.content-panel.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.panel-header {
+  margin-bottom: 32px;
+}
+
+.panel-icon { font-size: 40px; margin-bottom: 16px; }
+
+.panel-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--dark);
+  margin-bottom: 12px;
+}
+
+.panel-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  max-width: 480px;
+}
+
+.feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.feature-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.feature-list li::before {
+  content: '→';
+  color: var(--sage);
+  font-size: 13px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+/* ── RESEARCH FOUNDATION ── */
+#research {
+  background: var(--cream);
+}
+
+.research-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 20px;
+}
+
+.research-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  transition: all 0.25s;
+}
+
+.research-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+}
+
+.research-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 16px 16px 0 0;
+}
+
+.research-card.sage::before { background: var(--sage); }
+.research-card.teal::before { background: var(--teal); }
+.research-card.amber::before { background: var(--amber); }
+
+.rc-icon { font-size: 28px; margin-bottom: 16px; }
+
+.rc-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 10px;
+}
+
+.rc-body {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ── THEORY ── */
+#theory {
+  background: var(--sage-pale);
+}
+
+.theory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.theory-card {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  border: 1px solid var(--border);
+}
+
+.theory-tag {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--sage-pale);
+  color: var(--sage);
+  border: 1px solid rgba(90,122,92,0.2);
+  margin-bottom: 14px;
+}
+
+.theory-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--dark);
+  margin-bottom: 10px;
+}
+
+.theory-body {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ── IMPACT ── */
+#impact {
+  background: var(--amber-pale);
+}
+
+.impact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.impact-visual {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  border: 1px solid rgba(196,133,58,0.15);
+}
+
+.impact-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.impact-bar-label span:first-child { color: var(--dark); font-weight: 500; }
+.impact-bar-label span:last-child { color: var(--amber); font-weight: 500; }
+
+.impact-bar {
+  height: 6px;
+  background: rgba(196,133,58,0.12);
+  border-radius: 99px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.impact-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber), #e8a855);
+  border-radius: 99px;
+  width: 0;
+  transition: width 1.2s ease;
+}
+
+.impact-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ih-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.ih-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+.ih-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+
+.ih-body {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── TEAM ── */
+#team {
+  background: var(--dark2);
+  color: var(--cream);
+}
+
+#team .section-label { color: var(--sage-light); }
+#team .section-label::before { background: var(--sage-light); }
+#team h2.section-title { color: var(--cream); }
+#team .section-lead { color: rgba(250,248,244,0.6); }
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.team-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 28px 24px;
+  transition: all 0.25s;
+}
+
+.team-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(138,171,140,0.25);
+}
+
+.team-initial {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sage), var(--teal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.team-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.team-cred {
+  font-size: 11px;
+  color: var(--sage-light);
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+
+.team-role {
+  font-size: 12.5px;
+  color: rgba(250,248,244,0.5);
+  line-height: 1.5;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--dark);
+  color: rgba(250,248,244,0.4);
+  padding: 40px 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+footer .foot-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  color: rgba(250,248,244,0.6);
+}
+
+.disclaimer {
+  max-width: 480px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* ── ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  section, .hero { padding: 70px 24px; }
+  .hero { padding-top: 100px; }
+  .hero-scroll { left: 24px; }
+  .about-grid, .toolkit-intro, .impact-row { grid-template-columns: 1fr; gap: 40px; }
+  .research-grid { grid-template-columns: 1fr; }
+  .theory-grid { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: 1fr 1fr; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+}
 </style>
 </head>
 <body>
 
-<div id="shell">
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">PD <span>Toolkit</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">Overview</a></li>
+    <li><a href="#toolkit">The Toolkit</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#theory">Framework</a></li>
+    <li><a href="#team">Team</a></li>
+  </ul>
+</nav>
 
-  <!-- TOPBAR -->
-  <div id="topbar">
-    <div class="logo">PD Toolkit</div>
-    <div class="divider"></div>
-    <div id="slide-title">Cover</div>
-    <div id="progress-bar" style="width:0%"></div>
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-eyebrow">BSW Field Practicum · SIUC · 2025–2026</div>
+  <h1 class="hero-title">A Resource Toolkit for <em>People Living with Parkinson's</em></h1>
+  <p class="hero-sub">A comprehensive, regionally-specific guide designed to help patients and caregivers navigate care, access local resources, and maintain independence across Southern and Central Illinois.</p>
+
+  <div class="hero-meta reveal">
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">Focus Region</div>
+      <div class="hero-meta-value">Southern & Central Illinois</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">Sections</div>
+      <div class="hero-meta-value">7 Domains of Care</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">Institution</div>
+      <div class="hero-meta-value">Southern Illinois University Carbondale</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="hero-meta-label">Research Grounded In</div>
+      <div class="hero-meta-value">Focus Groups + Literature Review</div>
+    </div>
   </div>
 
-  <!-- MAIN -->
-  <div id="main">
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    Explore the project
+  </div>
+</section>
 
-    <!-- SIDEBAR -->
-    <div id="sidebar">
-      <div class="nav-section">Presentation</div>
-      <div class="nav-item active" data-slide="0"><div class="nav-icon">🎯</div> Cover</div>
-      <div class="nav-item" data-slide="1"><div class="nav-icon">🧩</div> Problem Overview</div>
-      <div class="nav-item" data-slide="2"><div class="nav-icon">📋</div> Project Overview</div>
-      <div class="nav-item" data-slide="3"><div class="nav-icon">🗂</div> Toolkit Design</div>
-      <div class="nav-item" data-slide="4"><div class="nav-icon">🗺</div> Systems Map</div>
-      <div class="nav-item" data-slide="5"><div class="nav-icon">📐</div> Theory Framework</div>
-      <div class="nav-item" data-slide="6"><div class="nav-icon">🛠</div> Planning & Impl.</div>
-      <div class="nav-item" data-slide="7"><div class="nav-icon">⚠️</div> Challenges</div>
-      <div class="nav-item" data-slide="8"><div class="nav-icon">🌍</div> Cultural & Ethics</div>
-      <div class="nav-item" data-slide="9"><div class="nav-icon">🎓</div> CSWE Competencies</div>
-      <div class="nav-item" data-slide="10"><div class="nav-icon">📈</div> Outcomes & Impact</div>
-      <div class="nav-item" data-slide="11"><div class="nav-icon">✦</div> A Moment</div>
-      <div class="nav-item" data-slide="12"><div class="nav-icon">💭</div> Self-Reflection</div>
+<!-- ABOUT / PROBLEM -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title" style="max-width:100%">Parkinson's care is <em>fragmented.</em> Navigating it shouldn't have to be.</h2>
+      <p class="section-lead" style="max-width:100%;color:rgba(250,248,244,0.6);">More than one million Americans live with Parkinson's disease — yet in rural and underserved communities, the resources, specialists, and support systems that can help remain scattered, hard to find, and harder to use.</p>
+
+      <div class="pull-quote">
+        "This wasn't just a lack of resources. It was a system that people were actively struggling to navigate — often alone, and often without anyone showing them where to start."
+      </div>
+
+      <p style="font-size:14px;color:rgba(250,248,244,0.5);line-height:1.75;">The toolkit was developed in direct response to focus group conversations with patients and caregivers who shared what was missing, what was confusing, and what would actually help. The result is a practical, plain-language guide built around real needs — not assumptions.</p>
     </div>
 
-    <!-- STAGE -->
-    <div id="stage">
+    <div class="stat-grid reveal reveal-delay-2">
+      <div class="stat-card">
+        <div class="stat-number">1M+</div>
+        <div class="stat-label">Americans with PD</div>
+        <div class="stat-desc">Second most common neurodegenerative disorder in the U.S.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">60K</div>
+        <div class="stat-label">New diagnoses / year</div>
+        <div class="stat-desc">And growing as the population ages.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">75%</div>
+        <div class="stat-label">Experience sleep disorders</div>
+        <div class="stat-desc">Non-motor symptoms are often underdiscussed in care.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">$52B</div>
+        <div class="stat-label">Annual U.S. burden</div>
+        <div class="stat-desc">In direct and indirect costs to patients, families, and systems.</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <!-- SLIDE 0: COVER -->
-      <div class="slide active" id="slide-cover" data-title="Cover">
-        <div class="slide-tag">BSW Field Practicum — Social Work Intervention</div>
-        <h1 class="slide-h1">Toolkit Design as a<br><em>Social Work Intervention:</em><br>A Parkinson's Disease<br>Resource Toolkit</h1>
-        <div class="cover-meta stagger">
-          <div class="cover-meta-row"><strong>Presenter</strong> Winston Scott, BSW Candidate</div>
-          <div class="cover-meta-row"><strong>Institution</strong> Southern Illinois University Carbondale</div>
-          <div class="cover-meta-row"><strong>Research Team</strong> Dr. Jurkowski, Radhika Devraj PhD FAPhA, Sobit Regmi</div>
-          <div class="cover-meta-row"><strong>Focus Region</strong> Southern &amp; Central Illinois</div>
-          <div class="cover-meta-row"><strong>Year</strong> 2025–2026</div>
+<!-- TOOLKIT SECTIONS -->
+<section id="toolkit">
+  <div class="toolkit-intro">
+    <div class="reveal">
+      <div class="section-label">The Toolkit</div>
+      <h2 class="section-title">Seven domains. One clear path.</h2>
+      <p class="section-lead">Each section addresses a distinct area of life with Parkinson's — and connects to the others. Because a medication change affects nutrition timing, which affects exercise capacity, which affects fall risk at home.</p>
+    </div>
+    <div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:260px 1fr;gap:40px;align-items:start">
+    <div class="section-nav reveal">
+      <div class="section-tab active" data-panel="p1">
+        <div class="tab-num">01</div>
+        <div class="tab-info">
+          <div class="tab-title">Home Adaptations</div>
+          <div class="tab-sub">Safety & independence</div>
         </div>
       </div>
-
-      <!-- SLIDE 1: PROBLEM OVERVIEW -->
-      <div class="slide" data-title="Problem Overview">
-        <div class="slide-tag">Section 01</div>
-        <h2 class="slide-h2">The Gap: Why Parkinson's Patients Are Underserved</h2>
-        <p class="lead">Parkinson's disease is the second most common neurodegenerative disorder in the U.S. — yet resource access, especially in rural and underserved communities, remains deeply fragmented.</p>
-
-        <div class="stat-strip stagger">
-          <div class="stat-box"><div class="stat-num">1M+</div><div class="stat-label">Americans with PD</div></div>
-          <div class="stat-box"><div class="stat-num">60K</div><div class="stat-label">New diagnoses/year</div></div>
-          <div class="stat-box"><div class="stat-num">75%</div><div class="stat-label">Experience sleep disorders</div></div>
-          <div class="stat-box"><div class="stat-num">$52B</div><div class="stat-label">Annual U.S. economic burden</div></div>
-        </div>
-
-        <div class="quote-block stagger" style="margin-top:28px;margin-bottom:4px;font-size:15px;line-height:1.7;">
-          I sat in on focus groups last semester and at the beginning of this semester, where I listened to patients and caregivers describe their experiences navigating Parkinson's care. I transcribed those conversations — which were later coded and used as data. What became clear was that this wasn't just a lack of resources. It was a system that people were actively struggling to navigate, often alone, and often without anyone showing them where to start.
-        </div>
-
-        <div class="card-grid cols-2 stagger">
-          <div class="card accent-border">
-            <div class="card-icon">🏥</div>
-            <div class="card-title">Fragmented Care Systems</div>
-            <div class="card-body">Patients navigate neurology, PT, OT, speech therapy, social work, and nutrition independently — with little coordination or shared resource guidance.</div>
-          </div>
-          <div class="card accent2-border">
-            <div class="card-icon">📍</div>
-            <div class="card-title">Rural Resource Gaps</div>
-            <div class="card-body">Southern Illinois lacks consolidated, region-specific PD resources. Patients in Carbondale and surrounding areas must independently piece together care options.</div>
-          </div>
-          <div class="card accent3-border">
-            <div class="card-icon">📚</div>
-            <div class="card-title">Health Literacy Barriers</div>
-            <div class="card-body">Medical information is often written at a graduate reading level. Patients and caregivers struggle to translate clinical language into actionable daily decisions.</div>
-          </div>
-          <div class="card accent-border">
-            <div class="card-icon">👥</div>
-            <div class="card-title">Caregiver Burden</div>
-            <div class="card-body">Family caregivers — often untrained — bear the weight of care coordination without structured support, education, or resource maps.</div>
-          </div>
+      <div class="section-tab" data-panel="p2">
+        <div class="tab-num">02</div>
+        <div class="tab-info">
+          <div class="tab-title">Nutrition</div>
+          <div class="tab-sub">Diet & medication balance</div>
         </div>
       </div>
-
-      <!-- SLIDE 2: PROJECT OVERVIEW -->
-      <div class="slide" data-title="Project Overview">
-        <div class="slide-tag">Section 02</div>
-        <h2 class="slide-h2">Project Overview</h2>
-        <p class="lead">A collaborative, community-responsive effort to design a practical, regionally-specific Parkinson's disease resource toolkit — built on what patients and caregivers actually told us, not assumptions about what they needed.</p>
-
-        <div class="timeline stagger">
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-label">Phase 1 · Research</div>
-            <div class="tl-title">Focus Groups, Needs Assessment &amp; Literature Review</div>
-            <div class="tl-body">The toolkit was not developed in isolation — it was grounded in coded focus group data gathered directly from patients and caregivers. Those conversations identified real barriers, real gaps, and real needs. That data shaped every section that followed.</div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-label">Phase 2 · Design</div>
-            <div class="tl-title">Section-by-Section Toolkit Development</div>
-            <div class="tl-body">7 sections assigned to team members. Winston led <span class="highlight-text">Section 4: Medical Professionals to Contact</span> — regional provider directories, certified clinician finders, and specialist resources.</div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-label">Phase 3 · Outreach</div>
-            <div class="tl-title">Provider Verification &amp; Community Engagement</div>
-            <div class="tl-body">Contacted regional nutrition providers (Branz Nutrition Counseling confirmed inclusion), verified DME suppliers, and mapped local support systems.</div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-label">Phase 4 · Integration</div>
-            <div class="tl-title">Team Synthesis &amp; Formatting</div>
-            <div class="tl-body">Sections integrated into unified toolkit with consistent design, citations, and regional specificity across Southern and Central Illinois.</div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-label">Ongoing</div>
-            <div class="tl-title">Review, Revision, and Dissemination Planning</div>
-            <div class="tl-body">Working with Dr. Jurkowski to finalize deliverables for community distribution and potential publication use.</div>
-          </div>
+      <div class="section-tab" data-panel="p3">
+        <div class="tab-num">03</div>
+        <div class="tab-info">
+          <div class="tab-title">Exercise</div>
+          <div class="tab-sub">Movement & voice</div>
         </div>
       </div>
-
-      <!-- SLIDE 3: TOOLKIT DESIGN -->
-      <div class="slide" data-title="Toolkit Design">
-        <div class="slide-tag">Section 03</div>
-        <h2 class="slide-h2">Toolkit Design: Seven Domains of Care</h2>
-        <p class="lead">The toolkit is organized as an integrated system — each section stands alone but connects to the whole.</p>
-
-        <div class="card-grid cols-3 stagger" style="margin-top:24px">
-          <div class="card">
-            <div class="card-icon">🏠</div>
-            <div class="card-title">Section 1 · Home Adaptations</div>
-            <div class="card-body">Mobility aids, fall prevention, bathroom safety, adaptive dining equipment, bed mobility, and communication technology.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon">🥦</div>
-            <div class="card-title">Section 2 · Nutrition</div>
-            <div class="card-body">Brain-healthy eating, protein/medication balance, symptom management through diet, and daily nutrition checklists.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon">🏃</div>
-            <div class="card-title">Section 3 · Exercise</div>
-            <div class="card-body">Evidence-based exercise types (PWR!Moves, LSVT BIG), regional exercise resources, and motor benefit research.</div>
-          </div>
-          <div class="card accent-border">
-            <div class="card-icon">🩺</div>
-            <div class="card-title">Section 4 · Medical Professionals</div>
-            <div class="card-body"><span class="highlight-text">Winston's section.</span> Regional provider directory: physicians, PT/OT/SLP, movement disorder specialists, LSVT and PWR!Moves certified clinicians.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon">🤝</div>
-            <div class="card-title">Section 5 · Social Support</div>
-            <div class="card-body">Regional PD support groups, Area Agencies on Aging, caregiver resources, and community connection programs.</div>
-          </div>
-          <div class="card">
-            <div class="card-icon">💊</div>
-            <div class="card-title">Section 6 · Medications</div>
-            <div class="card-body">Medication questions to ask your doctor, "on/off" period management, fall risks, food interactions, and timing guidance.</div>
-          </div>
-          <div class="card" style="grid-column: span 3">
-            <div class="card-icon">🌐</div>
-            <div class="card-title">Section 7 · Online &amp; Other Resources</div>
-            <div class="card-body">Key organizations (APDA, Michael J. Fox Foundation, LSVT Global), useful apps, YouTube channels, and podcasts for patients and caregivers.</div>
-          </div>
+      <div class="section-tab" data-panel="p4">
+        <div class="tab-num">04</div>
+        <div class="tab-info">
+          <div class="tab-title">Medications</div>
+          <div class="tab-sub">Timing & management</div>
         </div>
       </div>
-
-      <!-- SLIDE 4: MIND MAP -->
-      <div class="slide" data-title="Systems Mind Map">
-        <div class="slide-tag">Section 04 · Systems Visualization</div>
-        <h2 class="slide-h2">The Toolkit as a Living System</h2>
-        <p class="lead">Each domain of the toolkit intersects — a medication change affects nutrition timing, which affects exercise capacity, which affects fall risk at home.</p>
-
-        <svg id="mindmap-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <!-- connector lines -->
-          <g stroke="rgba(110,231,183,0.2)" stroke-width="1.5" fill="none">
-            <line x1="400" y1="200" x2="170" y2="90"/>
-            <line x1="400" y1="200" x2="630" y2="90"/>
-            <line x1="400" y1="200" x2="130" y2="220"/>
-            <line x1="400" y1="200" x2="670" y2="220"/>
-            <line x1="400" y1="200" x2="200" y2="340"/>
-            <line x1="400" y1="200" x2="600" y2="340"/>
-            <line x1="400" y1="200" x2="400" y2="340"/>
-          </g>
-
-          <!-- center node -->
-          <circle cx="400" cy="200" r="52" fill="rgba(110,231,183,0.08)" stroke="#6ee7b7" stroke-width="1.5" filter="url(#glow)"/>
-          <text x="400" y="194" text-anchor="middle" fill="#6ee7b7" font-family="Cormorant Garamond, serif" font-size="15" font-weight="600">Person</text>
-          <text x="400" y="212" text-anchor="middle" fill="#6ee7b7" font-family="Cormorant Garamond, serif" font-size="15" font-style="italic">Living with PD</text>
-
-          <!-- satellite nodes -->
-          <!-- Home -->
-          <rect x="100" y="55" width="140" height="70" rx="10" fill="rgba(17,24,39,0.9)" stroke="rgba(110,231,183,0.3)" stroke-width="1"/>
-          <text x="170" y="82" text-anchor="middle" fill="#6ee7b7" font-family="DM Sans, sans-serif" font-size="12" font-weight="600">🏠 Home</text>
-          <text x="170" y="98" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">Adaptations &amp;</text>
-          <text x="170" y="112" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">Safety Equipment</text>
-
-          <!-- Nutrition -->
-          <rect x="560" y="55" width="140" height="70" rx="10" fill="rgba(17,24,39,0.9)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
-          <text x="630" y="82" text-anchor="middle" fill="#38bdf8" font-family="DM Sans, sans-serif" font-size="12" font-weight="600">🥦 Nutrition</text>
-          <text x="630" y="98" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">Diet, protein balance,</text>
-          <text x="630" y="112" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">symptom management</text>
-
-          <!-- Social -->
-          <rect x="50" y="185" width="130" height="70" rx="10" fill="rgba(17,24,39,0.9)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
-          <text x="115" y="212" text-anchor="middle" fill="#f59e0b" font-family="DM Sans, sans-serif" font-size="12" font-weight="600">🤝 Social</text>
-          <text x="115" y="228" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">Support groups,</text>
-          <text x="115" y="243" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">caregivers, aging</text>
-
-          <!-- Medical -->
-          <rect x="620" y="185" width="140" height="70" rx="10" fill="rgba(17,24,39,0.9)" stroke="rgba(110,231,183,0.5)" stroke-width="2"/>
-          <text x="690" y="212" text-anchor="middle" fill="#6ee7b7" font-family="DM Sans, sans-serif" font-size="12" font-weight="600">🩺 Medical</text>
-          <text x="690" y="228" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">Physicians, PT/OT/SLP,</text>
-          <text x="690" y="243" text-anchor="middle" fill="#6ee7b7" font-family="DM Sans, sans-serif" font-size="10">Specialists ★</text>
-
-          <!-- Exercise -->
-          <rect x="130" y="310" width="130" height="65" rx="10" fill="rgba(17,24,39,0.9)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
-          <text x="195" y="335" text-anchor="middle" fill="#38bdf8" font-family="DM Sans, sans-serif" font-size="12" font-weight="600">🏃 Exercise</text>
-          <text x="195" y="351" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">PWR!Moves, LSVT,</text>
-          <text x="195" y="366" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">regional programs</text>
-
-          <!-- Resources -->
-          <rect x="530" y="310" width="140" height="65" rx="10" fill="rgba(17,24,39,0.9)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
-          <text x="600" y="335" text-anchor="middle" fill="#f59e0b" font-family="DM Sans, sans-serif" font-size="12" font-weight="600">🌐 Resources</text>
-          <text x="600" y="351" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">APDA, MJF Foundation,</text>
-          <text x="600" y="366" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">apps, podcasts</text>
-
-          <!-- Medications -->
-          <rect x="330" y="310" width="140" height="65" rx="10" fill="rgba(17,24,39,0.9)" stroke="rgba(110,231,183,0.3)" stroke-width="1"/>
-          <text x="400" y="335" text-anchor="middle" fill="#6ee7b7" font-family="DM Sans, sans-serif" font-size="12" font-weight="600">💊 Medications</text>
-          <text x="400" y="351" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">On/off periods, timing,</text>
-          <text x="400" y="366" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, sans-serif" font-size="10">fall risks, interactions</text>
-        </svg>
-
-        <div style="margin-top:12px;font-size:11px;color:var(--text-muted);text-align:center;">★ Section 4 (Medical Professionals) — Winston's primary contribution to the toolkit</div>
-      </div>
-
-      <!-- SLIDE 5: THEORY -->
-      <div class="slide" data-title="Theoretical Framework">
-        <div class="slide-tag">Section 05</div>
-        <h2 class="slide-h2">Theoretical Framework</h2>
-        <p class="lead">The toolkit is grounded in four interconnected social work theories — each one shaping how the resource was designed and for whom.</p>
-
-        <div class="card-grid cols-2 stagger" style="margin-top:24px">
-          <div class="card accent-border">
-            <div class="card-icon">🔗</div>
-            <div class="card-title">Systems Theory</div>
-            <div class="card-body">PD does not exist in isolation. The patient, family, healthcare system, community, and environment form an interconnected whole. The toolkit mirrors this — each section connects to the others, reflecting how changes in one domain ripple across all others.</div>
-          </div>
-          <div class="card accent2-border">
-            <div class="card-icon">🌍</div>
-            <div class="card-title">Person-in-Environment (PIE)</div>
-            <div class="card-body">Understanding PD requires seeing the person in their full environmental context — rural geography, income, housing, family structure. Section 4's regional provider directory was built with this lens: if you're in Marion, IL, your resources look different than St. Louis.</div>
-          </div>
-          <div class="card accent3-border">
-            <div class="card-icon">💪</div>
-            <div class="card-title">Empowerment Theory</div>
-            <div class="card-body">Patients and caregivers should be active agents in their own care — not passive recipients. The toolkit is designed to build knowledge, build confidence, and build capacity: clear language, actionable steps, and real local options they can actually call.</div>
-          </div>
-          <div class="card accent-border">
-            <div class="card-icon">📖</div>
-            <div class="card-title">Health Literacy Framework</div>
-            <div class="card-body">Medical information must be accessible. The toolkit intentionally uses plain language, plain-English explanations of complex concepts (on/off periods, freezing of gait, levodopa timing), and visual aids — meeting people where they are.</div>
-          </div>
+      <div class="section-tab" data-panel="p5">
+        <div class="tab-num">05</div>
+        <div class="tab-info">
+          <div class="tab-title">Medical Professionals</div>
+          <div class="tab-sub">Regional providers</div>
         </div>
       </div>
-
-      <!-- SLIDE 6: PLANNING & IMPLEMENTATION -->
-      <div class="slide" data-title="Planning & Implementation">
-        <div class="slide-tag">Section 06</div>
-        <h2 class="slide-h2">Planning &amp; Implementation Process</h2>
-
-        <div class="flow-row stagger">
-          <div class="flow-node">Literature<br>Review</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node">Section<br>Assignment</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node highlight">Regional<br>Research</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node">Provider<br>Outreach</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node">Team<br>Integration</div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-node">Final<br>Review</div>
-        </div>
-
-        <div class="card-grid cols-2 stagger" style="margin-top:24px">
-          <div class="card accent-border">
-            <div class="card-title">My Role — Research &amp; Social Work Intervention</div>
-            <div class="card-body" style="margin-top:8px">
-              <div style="margin-bottom:10px;font-size:12.5px;color:var(--text);line-height:1.6;">My role included participating in the research process itself. I sat in on focus groups and transcribed conversations that were later coded into usable data. That experience shaped how I approached toolkit development — because I had already heard firsthand where the system was failing people. From there, I translated complex medical systems into accessible, usable pathways for patients and caregivers.</div>
-              <div style="margin-bottom:6px">🎙 Participated in and transcribed focus group sessions</div>
-              <div style="margin-bottom:6px">📍 Verified regional neurologists and movement disorder specialists</div>
-              <div style="margin-bottom:6px">📍 Mapped certified PWR!Moves and LSVT clinicians</div>
-              <div style="margin-bottom:6px">📍 Conducted direct outreach — Branz Nutrition Counseling confirmed inclusion</div>
-              <div>📍 Formatted deliverables to match team design conventions</div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">Team Structure &amp; Collaboration</div>
-            <div class="card-body" style="margin-top:8px">
-              <div style="margin-bottom:8px"><span class="pill pill-green">Dr. Jurkowski</span> Principal Investigator / Supervisor</div>
-              <div style="margin-bottom:8px"><span class="pill pill-blue">Radhika Devraj, PhD, FAPhA</span> Team Collaborator</div>
-              <div style="margin-bottom:8px"><span class="pill pill-blue">Sobit Regmi</span> Team Collaborator</div>
-              <div style="margin-bottom:8px"><span class="pill pill-amber">Winston Scott</span> Section 4 Lead</div>
-              <div style="margin-top:12px;font-size:12px;color:var(--text-muted)">Coordination via shared documents, section-by-section drafts, and iterative team review.</div>
-            </div>
-          </div>
+      <div class="section-tab" data-panel="p6">
+        <div class="tab-num">06</div>
+        <div class="tab-info">
+          <div class="tab-title">Social Support</div>
+          <div class="tab-sub">Community & caregivers</div>
         </div>
       </div>
-
-      <!-- SLIDE 7: CHALLENGES -->
-      <div class="slide" data-title="Challenges & Barriers">
-        <div class="slide-tag">Section 07</div>
-        <h2 class="slide-h2">Challenges &amp; Barriers</h2>
-        <p class="lead">Real research work surfaces real obstacles. These challenges shaped the toolkit's design as much as its successes did.</p>
-
-        <div class="card-grid cols-2 stagger" style="margin-top:24px">
-          <div class="card accent3-border">
-            <div class="card-icon">🗺</div>
-            <div class="card-title">Geographic Scarcity</div>
-            <div class="card-body">Southern Illinois is medically underserved. Identifying verified, active PD specialists within a reasonable distance of Carbondale required extensive cross-referencing of national directories with local availability.</div>
-          </div>
-          <div class="card accent3-border">
-            <div class="card-icon">📞</div>
-            <div class="card-title">Provider Verification</div>
-            <div class="card-body">Online databases and provider lists are often outdated. Confirming that listed professionals actually see PD patients, accept new patients, and are still practicing required direct outreach.</div>
-          </div>
-          <div class="card accent3-border">
-            <div class="card-icon">📏</div>
-            <div class="card-title">Scope &amp; Depth Balance</div>
-            <div class="card-body">A toolkit must be comprehensive enough to be useful — but simple enough to be used. Finding the right depth across seven distinct domains while maintaining accessible language was an ongoing tension.</div>
-          </div>
-          <div class="card accent3-border">
-            <div class="card-icon">🔄</div>
-            <div class="card-title">Information Currency</div>
-            <div class="card-body">PD treatment guidelines, medications, and approved therapies evolve. Designing a toolkit that is accurate now while acknowledging it will require periodic updates required intentional framing throughout.</div>
-          </div>
+      <div class="section-tab" data-panel="p7">
+        <div class="tab-num">07</div>
+        <div class="tab-info">
+          <div class="tab-title">Online Resources</div>
+          <div class="tab-sub">Apps, orgs & more</div>
         </div>
       </div>
+    </div>
 
-      <!-- SLIDE 8: CULTURAL & ETHICAL -->
-      <div class="slide" data-title="Cultural & Ethical Considerations">
-        <div class="slide-tag">Section 08</div>
-        <h2 class="slide-h2">Cultural &amp; Ethical Considerations</h2>
-        <p class="lead">A toolkit that doesn't account for who is actually receiving it will fail the people who need it most.</p>
+    <div class="section-content reveal reveal-delay-2">
 
-        <div class="card-grid cols-3 stagger" style="margin-top:24px">
-          <div class="card accent-border">
-            <div class="card-icon">🗣</div>
-            <div class="card-title">Language Accessibility</div>
-            <div class="card-body">All toolkit content was written at a general adult reading level. Complex clinical terms are explained in plain language immediately upon use — not assumed, not glossed over.</div>
-          </div>
-          <div class="card accent-border">
-            <div class="card-icon">💰</div>
-            <div class="card-title">Economic Realities</div>
-            <div class="card-body">Resources are tiered by cost. Free and low-cost options are identified alongside standard options. Equipment reuse programs (Paraquad, IATP) were specifically included to address economic barriers.</div>
-          </div>
-          <div class="card accent-border">
-            <div class="card-icon">📍</div>
-            <div class="card-title">Geographic Equity</div>
-            <div class="card-body">Resources are mapped to specific regions — St. Louis, Edwardsville, Springfield, Carbondale — so that rural patients have access to what is actually available to them, not just what exists somewhere.</div>
-          </div>
-          <div class="card accent2-border">
-            <div class="card-icon">🔒</div>
-            <div class="card-title">Patient Autonomy</div>
-            <div class="card-body">The toolkit informs and empowers — it does not prescribe. Medical decisions are framed as conversations between patients and their providers, not directives from a document.</div>
-          </div>
-          <div class="card accent2-border">
-            <div class="card-icon">🤲</div>
-            <div class="card-title">Caregiver Recognition</div>
-            <div class="card-body">Caregivers are explicitly included as intended users throughout the toolkit — their burden, their questions, and their needs are addressed directly, not as an afterthought.</div>
-          </div>
-          <div class="card accent2-border">
-            <div class="card-icon">📋</div>
-            <div class="card-title">Informed Consent</div>
-            <div class="card-body">All outreach to providers (nutrition, DME, clinical specialists) was transparent about the toolkit's purpose and required affirmative confirmation before any provider was listed.</div>
-          </div>
-        </div>
+      <div class="content-panel active" id="p1">
+        <div class="panel-icon">🏠</div>
+        <div class="panel-title">Home Adaptations & Adaptive Equipment</div>
+        <p class="panel-desc">A safe home environment supports independence. This section covers the tools, modifications, and strategies that help people with PD live safely and confidently at home.</p>
+        <ul class="feature-list">
+          <li>Fall prevention: U-Step Neuro Walkers, laser canes, trekking poles, and contrasting floor tape for freezing of gait</li>
+          <li>Eating & dining: weighted utensils, Liftware Steady, scoop dishes, Dycem mats, and adaptive drinkware</li>
+          <li>Dressing tools: magnetic closures, button hooks, extra-long shoehorns, and elastic shoelaces</li>
+          <li>Bathroom safety: tub transfer benches, raised toilet seats with arms, and grab bars</li>
+          <li>Bed mobility: satin sheets, transfer handles, and step-by-step turning techniques</li>
+          <li>Communication: voice amplifiers, weighted pens, trackball mice, and large-key keyboards</li>
+          <li>Where to find equipment locally — including Centers for Independent Living</li>
+        </ul>
       </div>
 
-      <!-- SLIDE 9: CSWE -->
-      <div class="slide" data-title="CSWE Competency Integration">
-        <div class="slide-tag">Section 09</div>
-        <h2 class="slide-h2">CSWE Competency Integration</h2>
-        <p class="lead">This project demonstrates direct application of core CSWE Educational Policy and Accreditation Standards across multiple competency domains.</p>
-
-        <p style="margin-top:16px;font-size:13.5px;color:var(--text);font-style:italic;padding-left:16px;border-left:2px solid var(--accent);line-height:1.6;">These competencies were not theoretical — they directly shaped how decisions were made throughout the design and implementation of this toolkit. Every section reflects a choice about ethics, equity, or engagement that goes back to the standards below.</p>
-
-        <table class="comp-table stagger" style="margin-top:20px">
-          <thead>
-            <tr>
-              <th>Competency</th>
-              <th>Standard</th>
-              <th>How It Shows Up in This Project</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><div class="comp-num">01</div></div></td>
-              <td><strong style="color:var(--text)">Demonstrate Ethical &amp; Professional Behavior</strong></td>
-              <td>Provider outreach followed ethical protocols — transparency about purpose, no listing without consent. Toolkit framing consistently honors patient autonomy and self-determination.</td>
-            </tr>
-            <tr>
-              <td><div class="comp-num">02</div></td>
-              <td><strong style="color:var(--text)">Engage Diversity &amp; Difference in Practice</strong></td>
-              <td>Resources were designed with explicit attention to geographic, economic, and health literacy disparities — especially within Southern Illinois's rural, underserved communities.</td>
-            </tr>
-            <tr>
-              <td><div class="comp-num">04</div></td>
-              <td><strong style="color:var(--text)">Engage in Practice-Informed Research</strong></td>
-              <td>Section 4 was built through systematic research: literature review, national database searches, direct provider verification, and team-level integration — a full research-to-practice cycle.</td>
-            </tr>
-            <tr>
-              <td><div class="comp-num">06</div></td>
-              <td><strong style="color:var(--text)">Engage with Individuals, Families, Groups &amp; Communities</strong></td>
-              <td>The toolkit is designed as a community-level intervention — not a clinical document. It is built to be held, shared, and used by patients, caregivers, support groups, and social workers in the field.</td>
-            </tr>
-            <tr>
-              <td><div class="comp-num">09</div></td>
-              <td><strong style="color:var(--text)">Evaluate Practice with Individuals, Families &amp; Organizations</strong></td>
-              <td>The project includes awareness of ongoing evaluation needs — provider information requires periodic verification, and the toolkit's effectiveness will depend on community feedback over time.</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="content-panel" id="p2">
+        <div class="panel-icon">🥦</div>
+        <div class="panel-title">Nutrition</div>
+        <p class="panel-desc">There is no single "Parkinson's diet" — but what you eat significantly affects how your medications work, how you feel, and how well you manage symptoms day to day.</p>
+        <ul class="feature-list">
+          <li>The MIND Diet: a brain-healthy eating pattern combining Mediterranean and DASH principles</li>
+          <li>The 30/60 Rule: timing levodopa around protein intake to maximize medication effectiveness</li>
+          <li>Symptom-specific nutrition: managing constipation, low blood pressure, fatigue, nausea, and weight changes</li>
+          <li>Swallowing support: thickeners, soft food guidance, and when to request a speech therapy referral</li>
+          <li>A daily nutrition checklist for patients and caregivers</li>
+          <li>Cookbooks and the APDA recipe library for practical meal planning</li>
+        </ul>
       </div>
 
-      <!-- SLIDE 10: OUTCOMES -->
-      <div class="slide" data-title="Outcomes & Impact">
-        <div class="slide-tag">Section 10</div>
-        <h2 class="slide-h2">Outcomes &amp; Anticipated Impact</h2>
-        <p class="lead">A toolkit is only as powerful as the change it enables. Here is what this project produces — and what it opens the door to.</p>
-
-        <div class="card-grid cols-2 stagger" style="margin-top:24px">
-          <div class="card accent-border">
-            <div class="card-icon">📦</div>
-            <div class="card-title">Immediate Deliverable</div>
-            <div class="card-body">A comprehensive, regionally-specific Parkinson's Disease Resource Toolkit covering 7 domains of care — ready for distribution to patients, caregivers, social workers, and healthcare providers across Southern and Central Illinois.</div>
-          </div>
-          <div class="card accent2-border">
-            <div class="card-icon">🔗</div>
-            <div class="card-title">Bridging the System Gap</div>
-            <div class="card-body">Reduces the burden on individual patients and caregivers to self-navigate fragmented care. Social workers and case managers now have a vetted regional resource to place directly in clients' hands.</div>
-          </div>
-          <div class="card accent3-border">
-            <div class="card-icon">📣</div>
-            <div class="card-title">Community Visibility</div>
-            <div class="card-body">Provider outreach during Section 4 development created new awareness among local nutrition and medical professionals. Being listed builds connection — and connection enables referral.</div>
-          </div>
-          <div class="card accent-border">
-            <div class="card-icon">🎓</div>
-            <div class="card-title">Student Research Experience</div>
-            <div class="card-body">This project provided BSW-level research experience in a real, publishable deliverable — community engagement, systematic verification, team collaboration, and practice-informed methodology.</div>
-          </div>
-        </div>
-
-        <div class="quote-block" style="margin-top:24px">
-          Social work's most powerful intervention is often not a session — it's a door that was closed, now open.
-        </div>
+      <div class="content-panel" id="p3">
+        <div class="panel-icon">🏃</div>
+        <div class="panel-title">Exercise</div>
+        <p class="panel-desc">Exercise is one of the most powerful tools available to people with Parkinson's — improving balance, strength, flexibility, mood, and sleep. Aim for at least 2½ hours per week.</p>
+        <ul class="feature-list">
+          <li>PWR!Moves: Parkinson Wellness Recovery exercises designed specifically for PD</li>
+          <li>LSVT BIG: intensive physical therapy for motor symptoms</li>
+          <li>LSVT LOUD: voice and speech exercises to maintain vocal strength</li>
+          <li>Other beneficial exercise types: boxing, dance, tai chi, cycling, swimming</li>
+          <li>Regional exercise programs and classes available in Southern/Central Illinois</li>
+          <li>Parkinson's Foundation exercise infographics and video resources</li>
+        </ul>
       </div>
 
-      <!-- SLIDE 11: MOMENT SLIDE (visual contrast) -->
-      <div class="slide" data-title="A Moment of Clarity" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:radial-gradient(ellipse at center, rgba(110,231,183,0.06) 0%, transparent 70%);">
-        <div style="max-width:560px;">
-          <div class="slide-tag" style="justify-content:center;margin-bottom:24px;">Reflection</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3.5vw,36px);font-weight:300;line-height:1.4;color:var(--text);margin-bottom:28px;">
-            Every section of this toolkit represents<br>a real person who needed help<br>and a system that wasn't giving it.
-          </div>
-          <div style="width:40px;height:1px;background:var(--accent);margin:0 auto 28px;"></div>
-          <div style="font-size:14px;color:var(--text-muted);font-weight:300;line-height:1.7;">
-            Social work asks us to see that gap — and then do something about it.
-          </div>
-        </div>
+      <div class="content-panel" id="p4">
+        <div class="panel-icon">💊</div>
+        <div class="panel-title">Medications</div>
+        <p class="panel-desc">Understanding how Parkinson's medications work — and how to time them — can make a significant difference in daily quality of life. This section translates clinical language into practical guidance.</p>
+        <ul class="feature-list">
+          <li>How dopamine replacement medications work and why timing matters</li>
+          <li>Understanding ON and OFF periods — what they are and how to track them</li>
+          <li>Tools to remember medications: apps, pill organizers, alarms</li>
+          <li>Managing swallowing difficulties with medications</li>
+          <li>How medications relate to fall risk — and what to watch for</li>
+          <li>Over-the-counter supplements: what's safe, what to avoid</li>
+          <li>Questions to ask your doctor at your next appointment</li>
+        </ul>
       </div>
 
-      <!-- SLIDE 12: SELF-REFLECTION -->
-      <div class="slide" data-title="Self-Reflection">
-        <div class="slide-tag">Section 12</div>
-        <h2 class="slide-h2">Self-Reflection</h2>
-        <p class="lead">What this project taught me — about research, about Parkinson's disease, about social work, and about myself as a practitioner.</p>
+      <div class="content-panel" id="p5">
+        <div class="panel-icon">🩺</div>
+        <div class="panel-title">Medical Professionals</div>
+        <p class="panel-desc">A verified regional directory of physicians, therapists, and specialists who work with Parkinson's patients across Southern and Central Illinois — organized by specialty and location.</p>
+        <ul class="feature-list">
+          <li>Neurologists and movement disorder specialists accessible from Carbondale, Marion, and surrounding areas</li>
+          <li>Physical therapists certified in PWR!Moves and LSVT BIG</li>
+          <li>Occupational therapists, speech-language pathologists, and mental health providers</li>
+          <li>Nutritionists and dietitians with PD experience (including Branz Nutrition Counseling)</li>
+          <li>Alternative and complementary medicine providers</li>
+          <li>All listings verified through direct outreach as of May 2026</li>
+        </ul>
+      </div>
 
-        <div class="reflection-card stagger">
-          <div style="margin-bottom:20px">
-            <div class="card-title" style="margin-bottom:8px;font-size:14px">On the Work Itself</div>
-            <div class="lead" style="max-width:100%;font-size:13.5px">
-              Before this project, I knew what Parkinson's disease was — but I didn't understand what it felt like to live with it. Sitting in on focus groups changed that. I wasn't reading about barriers — I was transcribing them, in people's own words. When you hear a caregiver describe what it takes just to get their person to the right doctor, the system's failure stops being abstract.
-            </div>
-          </div>
+      <div class="content-panel" id="p6">
+        <div class="panel-icon">🤝</div>
+        <div class="panel-title">Social Support, Elder Care & Transportation</div>
+        <p class="panel-desc">Parkinson's affects the whole person — and the whole family. This section connects patients and caregivers to the community support systems that reduce isolation and ease the weight of caregiving.</p>
+        <ul class="feature-list">
+          <li>Regional Parkinson's support groups in Southern and Central Illinois</li>
+          <li>Caregiver-specific resources: respite care, support groups, and stress management</li>
+          <li>Area Agencies on Aging: services, contacts, and eligibility</li>
+          <li>Transportation options for medical appointments and daily needs</li>
+          <li>Elder law resources: legal planning for people with progressive illness</li>
+        </ul>
+      </div>
 
-          <div style="margin-bottom:20px">
-            <div class="card-title" style="margin-bottom:8px;font-size:14px">On Research as Practice</div>
-            <div class="lead" style="max-width:100%;font-size:13.5px">
-              I came into this project thinking of research and practice as separate tracks. I left understanding they're the same thing, done at different scales. Transcribing focus groups, coding themes, verifying providers, calling a nutrition practice to ask if they'd be listed — that's all practice. This project showed me how research becomes intervention.
-            </div>
-          </div>
+      <div class="content-panel" id="p7">
+        <div class="panel-icon">🌐</div>
+        <div class="panel-title">Online Resources</div>
+        <p class="panel-desc">Curated digital resources from trusted Parkinson's organizations — including apps, YouTube channels, podcasts, and major foundations — to supplement in-person care and support.</p>
+        <ul class="feature-list">
+          <li>Key organizations: APDA, Michael J. Fox Foundation, LSVT Global, Parkinson's Foundation</li>
+          <li>Useful mobile apps for symptom tracking, medication timing, and exercise</li>
+          <li>YouTube channels with guided exercises, caregiver education, and patient stories</li>
+          <li>Podcasts for patients and caregivers navigating daily life with PD</li>
+        </ul>
+      </div>
 
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH FOUNDATION -->
+<section id="research">
+  <div class="reveal">
+    <div class="section-label">Research Foundation</div>
+    <h2 class="section-title">Grounded in real voices. Built on real data.</h2>
+    <p class="section-lead">This toolkit was not built from assumptions. It was designed in direct response to what patients and caregivers said — and verified against what research shows actually works.</p>
+  </div>
+
+  <div class="research-grid">
+    <div class="research-card sage reveal">
+      <div class="rc-icon">🗣</div>
+      <div class="rc-title">Focus Group Research</div>
+      <div class="rc-body">Patients and caregivers participated in focus groups that were transcribed and coded into usable data. The barriers, needs, and gaps they identified directly shaped what the toolkit covers — and how it's written.</div>
+    </div>
+    <div class="research-card teal reveal reveal-delay-1">
+      <div class="rc-icon">📚</div>
+      <div class="rc-title">Literature Review</div>
+      <div class="rc-body">Systematic review of national Parkinson's disease resources, clinical guidelines, and existing toolkits. Only trusted, evidence-based sources were used to inform recommendations and resource listings.</div>
+    </div>
+    <div class="research-card amber reveal reveal-delay-2">
+      <div class="rc-icon">📍</div>
+      <div class="rc-title">Regional Provider Verification</div>
+      <div class="rc-body">All provider listings in Section 5 were verified through direct outreach — not just copied from online directories. Providers confirmed their willingness to be listed before inclusion. Accurate as of May 2026.</div>
+    </div>
+  </div>
+</section>
+
+<!-- THEORY -->
+<section id="theory">
+  <div class="reveal">
+    <div class="section-label">Theoretical Framework</div>
+    <h2 class="section-title">The <em>social work</em> lens behind the design.</h2>
+    <p class="section-lead">The toolkit isn't just a list of resources. Every design decision — what to include, how to write it, who to include it for — was shaped by core social work theory.</p>
+  </div>
+
+  <div class="theory-grid">
+    <div class="theory-card reveal">
+      <div class="theory-tag">Systems Theory</div>
+      <div class="theory-title">PD doesn't exist in isolation.</div>
+      <div class="theory-body">The patient, family, healthcare system, community, and environment form an interconnected whole. The toolkit's seven sections mirror this — each connects to the others, because changes in one domain ripple through all the rest.</div>
+    </div>
+    <div class="theory-card reveal reveal-delay-1">
+      <div class="theory-tag">Person-in-Environment</div>
+      <div class="theory-title">Context changes everything.</div>
+      <div class="theory-body">Resources were built for where people actually live. A patient in Marion, IL has different access than someone in St. Louis. The regional provider directory was built with this lens front and center.</div>
+    </div>
+    <div class="theory-card reveal reveal-delay-2">
+      <div class="theory-tag">Empowerment Theory</div>
+      <div class="theory-title">People are agents, not recipients.</div>
+      <div class="theory-body">The toolkit is designed to build knowledge, build confidence, and build capacity. Plain language, actionable steps, and real local options that patients can actually call — not just information to absorb.</div>
+    </div>
+    <div class="theory-card reveal reveal-delay-3">
+      <div class="theory-tag">Health Literacy</div>
+      <div class="theory-title">Meeting people where they are.</div>
+      <div class="theory-body">Medical information was intentionally written at a general adult reading level. Complex concepts like ON/OFF periods, freezing of gait, and levodopa timing are explained in plain language — immediately, every time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section id="impact">
+  <div class="impact-row">
+    <div class="reveal">
+      <div class="section-label">Impact</div>
+      <h2 class="section-title">What this project delivers.</h2>
+      <p class="section-lead">A toolkit is only as powerful as the change it enables. Here's what this project produces — and what it opens the door to.</p>
+
+      <div class="impact-highlights">
+        <div class="ih-item reveal">
+          <div class="ih-dot"></div>
           <div>
-            <div class="card-title" style="margin-bottom:8px;font-size:14px">On My Path Forward</div>
-            <div class="lead" style="max-width:100%;font-size:13.5px">
-              This project reinforced why I'm heading into the Advanced Standing MSW at UIUC. I want to do research that touches real people. This toolkit is something I can point to and say: someone's life might be easier because of this work. That's the kind of social worker I'm becoming — and the kind of practice I intend to build.
-            </div>
+            <div class="ih-title">A ready-to-use regional resource</div>
+            <div class="ih-body">A complete, verified guide across 7 care domains — ready for distribution to patients, caregivers, social workers, and healthcare providers across Southern and Central Illinois.</div>
           </div>
         </div>
-
-        <div style="margin-top:24px;display:flex;gap:8px;flex-wrap:wrap">
-          <span class="pill pill-green">Focus Group Research</span>
-          <span class="pill pill-green">Practice-Informed Research</span>
-          <span class="pill pill-blue">Rural Health Equity</span>
-          <span class="pill pill-blue">Empowerment Practice</span>
-          <span class="pill pill-amber">BSW to MSW Bridge</span>
-          <span class="pill pill-amber">Research Becomes Practice</span>
+        <div class="ih-item reveal reveal-delay-1">
+          <div class="ih-dot"></div>
+          <div>
+            <div class="ih-title">Reduced navigation burden</div>
+            <div class="ih-body">Social workers and case managers now have a vetted regional resource to place directly in clients' hands — reducing the time and effort required to piece together a care plan.</div>
+          </div>
+        </div>
+        <div class="ih-item reveal reveal-delay-2">
+          <div class="ih-dot"></div>
+          <div>
+            <div class="ih-title">Community connections built</div>
+            <div class="ih-body">Provider outreach during development created new awareness among local nutrition and medical professionals. Relationship-building that continues beyond the document itself.</div>
+          </div>
         </div>
       </div>
-
-    </div><!-- /stage -->
-  </div><!-- /main -->
-
-  <!-- BOTTOM BAR -->
-  <div id="bottombar">
-    <div id="slide-counter">1 / 13</div>
-    <div class="nav-btns">
-      <button class="nav-btn" id="btn-prev" disabled>← Prev</button>
-      <button class="nav-btn" id="btn-next">Next →</button>
     </div>
-    <div style="font-size:11px;color:var(--text-muted)">PD Resource Toolkit · SIUC · 2026</div>
+
+    <div class="impact-visual reveal reveal-delay-2">
+      <p style="font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:24px;font-weight:500;">Toolkit Coverage at a Glance</p>
+
+      <div class="impact-bar-label"><span>Home Safety & Adaptive Equipment</span><span>Full</span></div>
+      <div class="impact-bar"><div class="impact-bar-fill" style="--w:100%"></div></div>
+
+      <div class="impact-bar-label"><span>Nutrition & Medication Interaction</span><span>Full</span></div>
+      <div class="impact-bar"><div class="impact-bar-fill" style="--w:100%"></div></div>
+
+      <div class="impact-bar-label"><span>Exercise & Physical Therapy</span><span>Full</span></div>
+      <div class="impact-bar"><div class="impact-bar-fill" style="--w:100%"></div></div>
+
+      <div class="impact-bar-label"><span>Verified Regional Providers</span><span>Full</span></div>
+      <div class="impact-bar"><div class="impact-bar-fill" style="--w:100%"></div></div>
+
+      <div class="impact-bar-label"><span>Social & Caregiver Support</span><span>Full</span></div>
+      <div class="impact-bar"><div class="impact-bar-fill" style="--w:100%"></div></div>
+
+      <div class="impact-bar-label"><span>Online Resources & Apps</span><span>Full</span></div>
+      <div class="impact-bar"><div class="impact-bar-fill" style="--w:100%"></div></div>
+
+      <p style="font-size:11px;color:var(--text-muted);margin-top:24px;line-height:1.6;">All provider information verified through direct outreach. Accurate as of May 2026. Educational purposes only — not medical advice.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <div class="reveal">
+    <div class="section-label">Research Team</div>
+    <h2 class="section-title">The people behind the work.</h2>
+    <p class="section-lead">Developed through a collaborative practicum research project at Southern Illinois University Carbondale.</p>
   </div>
 
-</div><!-- /shell -->
+  <div class="team-grid">
+    <div class="team-card reveal">
+      <div class="team-initial">J</div>
+      <div class="team-name">Dr. Elaine Jurkowski</div>
+      <div class="team-cred">PhD · Principal Investigator</div>
+      <div class="team-role">Research supervisor and project lead. Southern Illinois University Carbondale.</div>
+    </div>
+    <div class="team-card reveal reveal-delay-1">
+      <div class="team-initial">R</div>
+      <div class="team-name">Radhika Devraj</div>
+      <div class="team-cred">PhD, FAPhA · Collaborator</div>
+      <div class="team-role">Research collaborator and subject matter contributor.</div>
+    </div>
+    <div class="team-card reveal reveal-delay-2">
+      <div class="team-initial">S</div>
+      <div class="team-name">Sobit Regmi</div>
+      <div class="team-cred">Research Collaborator</div>
+      <div class="team-role">Research collaborator contributing to toolkit development and design.</div>
+    </div>
+    <div class="team-card reveal reveal-delay-3">
+      <div class="team-initial">W</div>
+      <div class="team-name">Winston Scott</div>
+      <div class="team-cred">BSW Candidate · SIUC</div>
+      <div class="team-role">Field practicum student. Focus group transcription, Section 5 lead, regional provider verification and outreach.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="foot-brand">PD Resource Toolkit</div>
+    <div style="margin-top:8px;">Southern Illinois University Carbondale · 2025–2026</div>
+  </div>
+  <div class="disclaimer">
+    This toolkit is for educational purposes only and is not medical advice. Resource listings are accurate as of May 2026. For medical emergencies, call 911. Always consult your healthcare team about symptoms, medications, and changes in health.
+  </div>
+</footer>
 
 <script>
-  const slides = document.querySelectorAll('.slide');
-  const navItems = document.querySelectorAll('.nav-item');
-  const titleEl = document.getElementById('slide-title');
-  const counter = document.getElementById('slide-counter');
-  const progressBar = document.getElementById('progress-bar');
-  const btnPrev = document.getElementById('btn-prev');
-  const btnNext = document.getElementById('btn-next');
-  let current = 0;
+  // Tab switching
+  const tabs = document.querySelectorAll('.section-tab');
+  const panels = document.querySelectorAll('.content-panel');
 
-  function goTo(n) {
-    if (n < 0 || n >= slides.length) return;
-
-    slides[current].classList.remove('active');
-    slides[current].classList.add('exit');
-    setTimeout(() => slides[current].classList.remove('exit'), 450);
-
-    navItems[current].classList.remove('active');
-    current = n;
-    slides[current].classList.add('active');
-    navItems[current].classList.add('active');
-
-    // scroll to top of new slide
-    slides[current].scrollTop = 0;
-
-    titleEl.textContent = slides[current].dataset.title || '';
-    counter.textContent = `${current + 1} / ${slides.length}`;
-    progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
-
-    btnPrev.disabled = current === 0;
-    btnNext.disabled = current === slides.length - 1;
-  }
-
-  navItems.forEach((item, i) => {
-    item.addEventListener('click', () => goTo(i));
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+    });
   });
 
-  btnPrev.addEventListener('click', () => goTo(current - 1));
-  btnNext.addEventListener('click', () => goTo(current + 1));
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
-  });
+  reveals.forEach(el => observer.observe(el));
 
-  // init
-  goTo(0);
+  // Animate impact bars when visible
+  const bars = document.querySelectorAll('.impact-bar-fill');
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.width = '95%';
+        barObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  bars.forEach(bar => barObserver.observe(bar));
 </script>
+
 </body>
 </html>
